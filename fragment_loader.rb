@@ -4,7 +4,11 @@ require_relative 'usage'
 class FragmentLoader
   @@relations = {}
   @@groups = {}
-
+  @@uses = {}
+def self.uses(fragment)
+  @@uses[fragment] ||= []
+  @@uses[fragment]
+end
 =begin
   def self.add_configuration(group, class_name, methods)
     @@groups[group] ||= []
@@ -86,24 +90,29 @@ class FragmentLoader
         end
 
         def self.method_missing(method, *args)
-          @@uses.each do |use|
-            if use.respond_to?(method, args)
-              return use.send(method, *args)
-            end
+          FragmentLoader::uses(self.to_s).each do |use|
+            return use.public_send(method, *args) if use.respond_to?(method, args)
           end
 
-          super.method_missing(method, *args)
+          super
+        end
+
+        #Optimize this
+        def self.respond_to?(method, *args)
+          FragmentLoader::uses(self.to_s).each do |use|
+            return true if use.respond_to?(method, args)
+          end
+
+          super
         end
 
         def self.uses(*modules)
-          @@uses ||= []
-
           modules.each do |module_with|
             unless Kernel.const_defined?(module_with)
               FragmentLoader.load_fragment(module_with)
             end
 
-            @@uses << Kernel.const_get(module_with)
+            FragmentLoader::uses(self.to_s) << Kernel.const_get(module_with)
 
 
 
