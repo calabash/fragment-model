@@ -16,6 +16,7 @@ puts "======================================================="
 log ''
 
 $t = []
+=begin
 set_trace_func proc { |event, file, line, id, binding, classname|
   if file.include?('fragments')
     s = "#{classname.to_s.split("::").last}.#{id}"
@@ -26,6 +27,7 @@ set_trace_func proc { |event, file, line, id, binding, classname|
     end
   end
 }
+=end
 
 #FragmentLoader.set_configuration(:os, :Android)
 #Home.login

@@ -1,4 +1,8 @@
+require_relative 'relation'
+require_relative 'usage'
+
 class FragmentLoader
+  @@relations = {}
   @@groups = {}
 
 =begin
@@ -13,6 +17,14 @@ class FragmentLoader
     #@@groups[group][class_name] += methods
   end
 =end
+
+  #TODO: WE could probably improve with merging stuff. Think more about it
+  def self.add_relation(relation)
+    parent = relation.parent.to_s
+    @@relations[parent] ||= []
+
+    @@relations[parent] << relation
+  end
 
   def self.add_configuration(group, class_name)
     @@groups[group] ||= []
@@ -73,12 +85,30 @@ class FragmentLoader
           @@state[key]
         end
 
+        def self.method_missing(method, *args)
+          @@uses.each do |use|
+            if use.respond_to?(method, args)
+              return use.send(method, *args)
+            end
+          end
+
+          super.method_missing(method, *args)
+        end
+
         def self.uses(*modules)
+          @@uses ||= []
+
           modules.each do |module_with|
             unless Kernel.const_defined?(module_with)
               FragmentLoader.load_fragment(module_with)
             end
 
+            @@uses << Kernel.const_get(module_with)
+
+
+
+
+=begin
             m = Kernel.const_get(module_with)
             methods = m.methods(false)
 
@@ -95,6 +125,7 @@ class FragmentLoader
                   end
                   )
             end
+=end
           end
         end
 

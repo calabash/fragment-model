@@ -28,4 +28,4 @@ end
 =begin
 def assert_title
   get_title == current_title
-end
+=end
