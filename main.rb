@@ -1,5 +1,14 @@
 def log(msg)
+  mutex = Mutex.new
+  mutex.lock
   puts msg
+  mutex.unlock
+end
+
+def assert(assertion, msg=nil)
+  msg ||= 'Assertion failed'
+
+  raise "\e[31m#{msg}\e[0m" unless assertion
 end
 
 def ni
@@ -12,7 +21,7 @@ FragmentLoader.load_fragments
 
 log 'Done loading fragments'
 log ''
-puts "======================================================="
+log "======================================================="
 log ''
 
 $t = []
@@ -28,8 +37,7 @@ set_trace_func proc { |event, file, line, id, binding, classname|
   end
 }
 =end
-
-
+begin
 
 
 
@@ -58,7 +66,14 @@ end
 
 
 
-
+rescue => e
+  log "\e[31mTest failed! '#{e.message}'\e[0m"
+  e.backtrace.first(4).each {|trace| log(trace)} if e && e.backtrace
+  log("....")
+  e.backtrace.last(6).first(4).each {|trace| log(trace)} if e && e.backtrace
+else
+  log "\e[32mTest succeeded!\e[0m"
+end
 
 
 

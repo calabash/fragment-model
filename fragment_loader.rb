@@ -100,8 +100,9 @@ class FragmentLoader
           @@state.merge!(state)
         end
 
-        def self.state(key)
-          raise "State #{key} not set" unless @@state.key?(key)
+        def self.state(key, msg=nil)
+          msg ||= "State #{key} not set"
+          raise msg unless @@state.key?(key)
 
           @@state[key]
         end
@@ -118,8 +119,15 @@ class FragmentLoader
           FragmentLoader::all_uses(self.to_s).each do |use|
             # TODO: Find better method of doing this please
             if use.to_s.split('::').last == method.to_s
+              $origin = self
               return self # TODO: Use methods in the scope of the subclass
             end
+          end
+
+          # THIS IS SO BAD!!!!
+          unless $origin.nil?
+            origin = $origin
+            return origin.method_missing(method, *args)
           end
 
           super
