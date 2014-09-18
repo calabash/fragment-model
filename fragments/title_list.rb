@@ -6,8 +6,14 @@ module TitleList
   end
 
   def self.visit_title(title)
-    log "Visiting #{title}"
-    Planet.set_state!('last_visited_title' => title) # this is bad
+    set_state!(title: title)
+    log "Touching title #{title}"
+    log "I am now on planet page"
+    #Planet.set_state!('last_visited_title' => title) # this is bad
+  end
+
+  def self.last_visited_title
+    state(:title, 'No title has been visited yet!')
   end
 end
 

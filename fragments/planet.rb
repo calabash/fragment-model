@@ -6,18 +6,15 @@ module Planet
   end
 
   def self.assert_title
-    log 'Asserting title...'
+    log 'Asserting title... '
 
-    if read_title != last_visited_title
-      log "\e[31mFailure! '#{read_title}' != '#{last_visited_title}'\e[0m"
-    else
-      log "\e[32mValid! '#{read_title}' == '#{last_visited_title}'\e[0m"
-    end
+    assert(read_title == last_visited_title, "Read title '#{read_title}' should be last visited title '#{last_visited_title}'")
   end
 
-  def self.last_visited_title
-    state('last_visited_title')
-  end
+  # Let parent handle this
+  #def self.last_visited_title
+    #state('last_visited_title')
+  #end
 end
 
 # YOU CANT OPEN IF YOU DON*T CLOSE
