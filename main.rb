@@ -29,13 +29,25 @@ set_trace_func proc { |event, file, line, id, binding, classname|
 }
 =end
 
+
+
+
+
+
+
+
+
+
+
+
 FragmentLoader.set_configuration(:os, :IOS)
 Home.login
 Home.open_menu
 
 Home.titles.each do |title|
   Home.visit_title(title)
-  Home.assert_title
+  Home.Planet.assert_title
+  #Home.assert_title
 end
 
 

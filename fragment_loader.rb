@@ -5,10 +5,26 @@ class FragmentLoader
   @@relations = {}
   @@groups = {}
   @@uses = {}
-def self.uses(fragment)
-  @@uses[fragment] ||= []
-  @@uses[fragment]
-end
+
+  def self.uses(fragment)
+    @@uses[fragment] ||= []
+    @@uses[fragment]
+  end
+
+  def self.all_uses(fragment)
+    uses = uses(fragment)
+
+    all_use = uses
+
+    #TODO: Fix cross dependencies?
+    # Fix this implementation.... It is really bad
+    uses.each do |use|
+      all_use += all_uses(use.to_s)
+      all_use.uniq!
+    end
+
+    all_use
+  end
 =begin
   def self.add_configuration(group, class_name, methods)
     @@groups[group] ||= []
@@ -90,9 +106,20 @@ end
           @@state[key]
         end
 
+        # This entire thing is really bad.. Method_missing and respond_to? are copy paste
+
         def self.method_missing(method, *args)
           FragmentLoader::uses(self.to_s).each do |use|
             return use.public_send(method, *args) if use.respond_to?(method, args)
+          end
+
+          # Referred to dependent page
+          # TODO: Use methods in the scope of the subclass
+          FragmentLoader::all_uses(self.to_s).each do |use|
+            # TODO: Find better method of doing this please
+            if use.to_s.split('::').last == method.to_s
+              return self # TODO: Use methods in the scope of the subclass
+            end
           end
 
           super

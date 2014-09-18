@@ -7,7 +7,7 @@ module TitleList
 
   def self.visit_title(title)
     log "Visiting #{title}"
-    Planet.set_state!('last_visited_title' => title)
+    Planet.set_state!('last_visited_title' => title) # this is bad
   end
 end
 
