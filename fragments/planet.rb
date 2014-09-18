@@ -6,10 +6,12 @@ module Planet
   end
 
   def self.assert_title
-    log 'Asserting title'
+    log 'Asserting title...'
 
     if read_title != last_visited_title
-      log "\e[31mFailure! #{read_title} != #{last_visited_title}\e[0m"
+      log "\e[31mFailure! '#{read_title}' != '#{last_visited_title}'\e[0m"
+    else
+      log "\e[32mValid! '#{read_title}' == '#{last_visited_title}'\e[0m"
     end
   end
 

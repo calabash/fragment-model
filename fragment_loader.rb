@@ -39,6 +39,7 @@ end
     # By default we append the configuration name to the class name.
     # TODO: Add ability to specify what file should be loaded
     # Also (mb) TODO: When new modules are loaded, we MIGHT have to save this information and reapply to new fragments
+    # also verify that no methods go from implemented to implemented
 
     if @@groups[group].nil?
       log "Group '#{group}' is not set"

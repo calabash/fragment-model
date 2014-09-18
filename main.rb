@@ -29,9 +29,9 @@ set_trace_func proc { |event, file, line, id, binding, classname|
 }
 =end
 
-#FragmentLoader.set_configuration(:os, :Android)
-#Home.login
-#Home.open_menu
+FragmentLoader.set_configuration(:os, :IOS)
+Home.login
+Home.open_menu
 
 Home.titles.each do |title|
   Home.visit_title(title)
