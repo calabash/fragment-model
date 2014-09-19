@@ -120,7 +120,7 @@ class FragmentLoader
             end
           end
 
-          return public_send(method, *args) if respond_to?(method, args)
+          return public_send(method, *args) if methods(false).include?(method)
 
           FragmentLoader::uses(self.to_s).each do |use|
             return use.public_send(method, *args) if use.respond_to?(method, args)
