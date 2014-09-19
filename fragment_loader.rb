@@ -110,10 +110,6 @@ class FragmentLoader
         # This entire thing is really bad.. Method_missing and respond_to? are copy paste
 
         def self.method_missing(method, *args)
-          FragmentLoader::uses(self.to_s).each do |use|
-            return use.public_send(method, *args) if use.respond_to?(method, args)
-          end
-
           # Referred to dependent page
           # TODO: Use methods in the scope of the subclass
           FragmentLoader::all_uses(self.to_s).each do |use|
@@ -122,6 +118,12 @@ class FragmentLoader
               $origin = self
               return self # TODO: Use methods in the scope of the subclass
             end
+          end
+
+          return public_send(method, *args) if respond_to?(method, args)
+
+          FragmentLoader::uses(self.to_s).each do |use|
+            return use.public_send(method, *args) if use.respond_to?(method, args)
           end
 
           # THIS IS SO BAD!!!!
