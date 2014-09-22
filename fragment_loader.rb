@@ -7,10 +7,23 @@ class FragmentLoader
   @@relations = {}
   @@groups = {}
   @@uses = {}
+  @@tmp = []
 
   def self.uses(fragment)
     @@uses[fragment] ||= []
     @@uses[fragment]
+  end
+
+  def self.tmp(index)
+    @@tmp[index]
+  end
+
+  def self.tmp_add(v)
+    @@tmp << v
+  end
+
+  def self.tmp_length
+    @@tmp.length
   end
 
   def self.all_uses(fragment)
@@ -120,30 +133,32 @@ class FragmentLoader
           end
 
           if nesting.length > 1
-            return nesting[1].method_missing(method, *args)
+            return nesting[1].send(:method_missing, *([method] + args))
           end
 
           super
         end
 
         def self.const_missing(const)
-          puts self.to_s
-
           FragmentLoader::all_uses(self.to_s).each do |use|
             if use.to_s.split('::').last == const.to_s
               $self = self
+              FragmentLoader.tmp_add($self)
 
               tmp = Kernel.const_get(const).dup
+              FragmentLoader.tmp_add(tmp)
 
               # def self.to_s IS SO BAD?? TODO: FIX ME
               # Why does it exist? To fix multi stacking A::B::C
+              # TODO: Fix this nesting method as well. Expected [A, B, C], actual: [B, C]
               tmp.module_eval(%{
               def self.to_s
                 "Kernel::#{const}"
               end
-                def self.nesting
-                  [self, #{$self}]
-                end
+
+              def self.nesting
+                [self, FragmentLoader.tmp(#{FragmentLoader.tmp_length-2})]
+              end
                               })
 
               return tmp
