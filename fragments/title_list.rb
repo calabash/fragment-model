@@ -13,7 +13,7 @@ module TitleList
   end
 
   def self.last_visited_title
-    foo #state(:title, 'No title has been visited yet!')
+    state(:title, 'No title has been visited yet!')
   end
 end
 

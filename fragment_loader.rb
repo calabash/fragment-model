@@ -112,12 +112,13 @@ class FragmentLoader
         end
 
         def self.set_state!(state)
-          @@state = {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
+          @@state ||= {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
           @@state.merge!(state)
         end
 
         def self.state(key, msg=nil)
           msg ||= "State #{key} not set"
+          @@state ||= {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
           raise msg unless @@state.key?(key)
 
           @@state[key]
@@ -152,6 +153,7 @@ class FragmentLoader
               # Why does it exist? To fix multi stacking A::B::C
               # TODO: Fix this nesting method as well. Expected [A, B, C], actual: [B, C]
               tmp.module_eval(%{
+              set_state!('foo' => 'bar')
               def self.to_s
                 "Kernel::#{const}"
               end
