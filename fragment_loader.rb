@@ -97,6 +97,7 @@ class FragmentLoader
         end
 
         def self.set_state!(state)
+          @@state = {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
           @@state.merge!(state)
         end
 
@@ -116,7 +117,35 @@ class FragmentLoader
             return use.public_send(method, *args) if use.respond_to?(method, args)
           end
 
-          
+          if nesting.length > 1
+            return nesting[1].method_missing(method, *args)
+          end
+
+          super
+        end
+
+        def self.const_missing(const)
+          puts self.to_s
+          FragmentLoader::all_uses(self.to_s).each do |use|
+            if use.to_s.split('::').last == const.to_s
+              $self = self
+
+              tmp = Kernel.const_get(const).dup
+
+              # def self.to_s IS SO BAD?? TODO: FIX ME
+              # Why does it exist? To fix multi stacking A::B::C
+              tmp.module_eval(%{
+              def self.to_s
+                "Kernel::#{const}"
+              end
+                def self.nesting
+                  [self, #{$self}]
+                end
+                              })
+
+              return tmp
+            end
+          end
 
           super
         end
