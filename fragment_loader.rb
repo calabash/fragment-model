@@ -8,6 +8,20 @@ class FragmentLoader
   @@groups = {}
   @@uses = {}
   @@tmp = []
+  @@state = {}
+
+  def self.set_state!(name, state)
+    @@state[name] ||= {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
+    @@state[name].merge!(state)
+  end
+
+  def self.state(name, key, msg=nil)
+    msg ||= "State #{key} not set"
+    @@state[name] ||= {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
+    raise msg unless @@state[name].key?(key)
+
+    @@state[name][key]
+  end
 
   def self.uses(fragment)
     @@uses[fragment] ||= []
@@ -111,17 +125,16 @@ class FragmentLoader
           @@state = {}
         end
 
+        def self.saved_name
+          to_s.split('::').last
+        end
+
         def self.set_state!(state)
-          @@state ||= {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
-          @@state.merge!(state)
+          FragmentLoader.set_state!(saved_name, state)
         end
 
         def self.state(key, msg=nil)
-          msg ||= "State #{key} not set"
-          @@state ||= {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
-          raise msg unless @@state.key?(key)
-
-          @@state[key]
+          FragmentLoader.state(saved_name, key, msg)
         end
 
         # This entire thing is really bad.. Method_missing and respond_to? are copy paste
