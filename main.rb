@@ -54,7 +54,9 @@ Home.open_menu
 
 Home.titles.each do |title|
   Home.visit_title(title)
-  Home::Planet.assert_title # SHOULD WE DO Planet.assert_title(Home) instead? Or Home.for(Planet).assert_title
+  p Home::TitleList.last_visited_title
+  p "here"
+  p Home::TitleList::Planet.last_visited_title # SHOULD WE DO Planet.assert_title(Home) instead? Or Home.for(Planet).assert_title
   #Home.assert_title
 end
 

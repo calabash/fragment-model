@@ -1,6 +1,8 @@
 require_relative 'relation'
 require_relative 'usage'
 
+# TODO: STOP USING @@uses[self.to_s] to_s sucks in this case
+
 class FragmentLoader
   @@relations = {}
   @@groups = {}
@@ -126,6 +128,7 @@ class FragmentLoader
 
         def self.const_missing(const)
           puts self.to_s
+
           FragmentLoader::all_uses(self.to_s).each do |use|
             if use.to_s.split('::').last == const.to_s
               $self = self
@@ -159,6 +162,10 @@ class FragmentLoader
           end
 
           super
+        end
+
+        def self.nesting
+          Module.nesting
         end
 
         def self.uses(*modules)
