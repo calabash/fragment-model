@@ -9,6 +9,7 @@ class FragmentLoader
   @@uses = {}
   @@tmp = []
   @@state = {}
+  @@shared_state = {}
 
   def self.reset!
     @@relations = {}
@@ -16,19 +17,41 @@ class FragmentLoader
     @@uses = {}
     @@tmp = []
     @@state = {}
+    @@shared_state = {}
   end
 
   def self.set_state!(name, state)
+    log "Setting state #{state} for name #{name}"
+
+    unless shared_state(name).nil?
+      log "#{name} is using shared state. Setting name to #{shared_state(name)}"
+      name = shared_state(name).to_s
+    end
+
     @@state[name] ||= {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
     @@state[name].merge!(state)
   end
 
   def self.state(name, key, msg=nil)
+    log "Getting state #{key} for #{name}"
     msg ||= "State #{key} not set"
     @@state[name] ||= {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
     raise msg unless @@state[name].key?(key)
 
     @@state[name][key]
+  end
+
+  def self.share_state(from, to)
+    if @@shared_state[from].nil?
+      @@shared_state[from] = to
+    else
+      raise "#{from} is already sharing state with #{@@shared_state[from]}"
+    end
+  end
+
+  # TODO: Save it as the real module instead and use it to get it's name
+  def self.shared_state(fragment)
+    @@shared_state[fragment]
   end
 
   def self.uses(fragment)
@@ -210,6 +233,10 @@ class FragmentLoader
           all = FragmentLoader::all_uses(self) << self
 
           all.include?(value)
+        end
+
+        def self.share_state(mod)
+          FragmentLoader.share_state(saved_name, mod)
         end
 
         def self.uses(*modules)
