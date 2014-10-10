@@ -10,6 +10,14 @@ class FragmentLoader
   @@tmp = []
   @@state = {}
 
+  def self.reset!
+    @@relations = {}
+    @@groups = {}
+    @@uses = {}
+    @@tmp = []
+    @@state = {}
+  end
+
   def self.set_state!(name, state)
     @@state[name] ||= {} # TODO: Is this nasty? It happens on configuration change. WE should rather SAVE the state and put it in the new configuration
     @@state[name].merge!(state)
@@ -166,7 +174,6 @@ class FragmentLoader
               # Why does it exist? To fix multi stacking A::B::C
               # TODO: Fix this nesting method as well. Expected [A, B, C], actual: [B, C]
               tmp.module_eval(%{
-              set_state!('foo' => 'bar')
               def self.to_s
                 "Kernel::#{const}"
               end
@@ -196,6 +203,13 @@ class FragmentLoader
 
         def self.nesting
           Module.nesting
+        end
+
+        # TODO: I don't know if this is a bad idea
+        def self.===(value)
+          all = FragmentLoader::all_uses(self) << self
+
+          all.include?(value)
         end
 
         def self.uses(*modules)
